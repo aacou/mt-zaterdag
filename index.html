@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Plaatsenlijst</title>
+<meta name="theme-color" content="#2446a8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Plaatsenlijst">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script src="config.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Figtree:wght@400;500;600&display=swap">
+<style>
+:root {
+  --bg: #f3f5f8; --surface: #ffffff; --fg: #172033; --muted: #5d6779; --line: #dde2ea; --accent: #2446a8;
+  --ok: #1d8a4e; --ok-bg: #e3f4ea; --wait: #c46a08; --wait-bg: #fdf0dc; --no: #c2352b; --no-bg: #fbe5e3; --idle-bg: #eef1f5;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Figtree", "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root {
+  --bg: #0f141d; --surface: #182030; --fg: #e8ecf3; --muted: #9aa4b6; --line: #2a3446; --accent: #8fa9ff;
+  --ok: #4fd18a; --ok-bg: #143323; --wait: #f4a547; --wait-bg: #3a2810; --no: #ff7a6e; --no-bg: #3d1a17; --idle-bg: #212a3b;
+  color-scheme: dark } }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.45 var(--body); }
+.wrap { max-width: 560px; margin: 0 auto; padding-inline: 16px;
+  padding-block: calc(20px + env(safe-area-inset-top, 0px)) calc(48px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 16px; }
+h1 { font: 800 1.9rem/1.05 var(--display); margin: 0; letter-spacing: -0.01em; }
+.sub { color: var(--muted); margin: 4px 0 0; font-size: .95rem; }
+.tally { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 999px; font-size: .88rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.chip i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.chip.ok { background: var(--ok-bg); color: var(--ok); } .chip.ok i { background: var(--ok); }
+.chip.wait { background: var(--wait-bg); color: var(--wait); } .chip.wait i { background: var(--wait); }
+.chip.no { background: var(--no-bg); color: var(--no); } .chip.no i { background: var(--no); }
+.chip.idle { background: var(--idle-bg); color: var(--muted); } .chip.idle i { background: var(--muted); }
+.legend { font-size: .85rem; color: var(--muted); margin: 0; }
+ol.list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.row { display: grid; grid-template-columns: 2.2rem 1fr auto; align-items: center; gap: 10px;
+  background: var(--surface); border: 1px solid var(--line); border-left: 6px solid var(--line);
+  border-radius: 10px; padding: 8px 8px 8px 10px; }
+.nr { font: 800 1.15rem/1 var(--display); color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
+.who { min-width: 0; }
+.name { font-weight: 600; overflow-wrap: anywhere; }
+.state { font-size: .8rem; color: var(--muted); }
+.row.ok { background: var(--ok-bg); border-left-color: var(--ok); } .row.ok .state, .row.ok .nr { color: var(--ok); }
+.row.wait { background: var(--wait-bg); border-left-color: var(--wait); } .row.wait .state, .row.wait .nr { color: var(--wait); }
+.row.no { background: var(--no-bg); border-left-color: var(--no); } .row.no .state, .row.no .nr { color: var(--no); }
+.row.no .name { text-decoration: line-through; }
+.row.me { outline: 2px solid var(--accent); outline-offset: 1px; }
+.btns { display: flex; gap: 6px; }
+.btns button { width: 44px; height: 40px; border-radius: 9px; border: 1.5px solid var(--line); background: var(--surface);
+  color: var(--muted); font: 600 1.15rem/1 var(--body); cursor: pointer; }
+.btns button.yes.on { background: var(--ok); border-color: var(--ok); color: var(--surface); }
+.btns button.nay.on { background: var(--no); border-color: var(--no); color: var(--surface); }
+.btns button:disabled { opacity: .5; }
+button:focus-visible, select:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.cut { display: flex; align-items: center; gap: 10px; color: var(--accent); font-size: .78rem; font-weight: 600;
+  letter-spacing: .08em; text-transform: uppercase; padding: 6px 2px; }
+.cut::before, .cut::after { content: ""; flex: 1; border-top: 2px dashed var(--accent); opacity: .6; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 8px; }
+label { font-size: .9rem; font-weight: 600; }
+select { font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px; width: 100%; }
+.msg { font-size: .9rem; padding: 10px 12px; border-radius: 8px; background: var(--idle-bg); }
+.msg.err { background: var(--no-bg); color: var(--no); }
+.empty { text-align: center; padding: 28px 16px; color: var(--muted); background: var(--surface); border: 1px dashed var(--line); border-radius: 12px; }
+.meline { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; justify-content: space-between; }
+.link { background: none; border: 0; padding: 4px 0; color: var(--accent); font: 600 .9rem var(--body); text-decoration: underline; cursor: pointer; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.btn { font: 600 .95rem/1 var(--body); padding: 11px 14px; border-radius: 9px; border: 1.5px solid var(--accent); background: var(--accent); color: var(--surface); cursor: pointer; }
+.btn.danger { background: var(--no); border-color: var(--no); }
+.btn.ghost { background: transparent; color: var(--accent); }
+.btn:disabled { opacity: .5; }
+.panel .ok { color: var(--ok); font-size: .9rem; }
+#adminCode { font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px; width: 8rem; }
+.when { margin: 8px 0 0; font-size: 1.05rem; }
+.when b { color: var(--accent); }
+.confirm { display: grid; gap: 8px; }
+#newDate { font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px; max-width: 14rem; }
+.foot { font-size: .8rem; color: var(--muted); text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Plaatsenlijst</h1>
+    <p class="when" id="when" hidden>Volgende ontmoeting: <b id="whenDate"></b></p>
+    <p class="sub" id="sub">Duid aan of je komt; de lijst schuift vanzelf door.</p>
+  </header>
+  <div class="tally" id="tally" aria-live="polite"></div>
+  <p class="legend"><b>Groen</b>: je hebt een plaats. <b>Oranje</b>: je komt graag, maar staat op de wachtlijst. <b>Rood</b>: je komt niet. Grijs: nog niet geantwoord.</p>
+  <div class="panel" id="mePanel" hidden>
+    <div id="chooseMe">
+      <label for="meSelect">Wie ben jij? Kies je naam om te kunnen antwoorden.</label>
+      <select id="meSelect"></select>
+    </div>
+    <div id="isMe" class="meline" hidden>
+      <span>Je bent <b id="meName"></b>. Antwoord met ✓ of ✕ op je eigen rij.</span>
+      <button type="button" class="link" id="changeMe">Niet jij?</button>
+    </div>
+  </div>
+  <div class="msg err" id="err" hidden></div>
+  <div class="empty" id="empty">Lijst laden…</div>
+  <ol class="list" id="list"></ol>
+  <p class="foot" id="foot"></p>
+
+  <section class="panel" id="admin" hidden>
+    <strong>Beheer</strong>
+    <div class="actions" id="resetActions">
+      <button type="button" class="btn danger" id="resetBtn">Nieuwe week starten</button>
+      <button type="button" class="btn ghost" id="dateBtn">Enkel datum aanpassen</button>
+      <button type="button" class="link" id="adminLogout">Afmelden als beheerder</button>
+    </div>
+    <div id="resetConfirm" class="confirm" hidden>
+      <label for="newDate">Datum van de ontmoeting</label>
+      <input id="newDate" type="date">
+      <span id="confirmText"></span>
+      <div class="actions">
+        <button type="button" class="btn danger" id="resetYes"></button>
+        <button type="button" class="btn ghost" id="resetNo">Annuleren</button>
+      </div>
+    </div>
+    <div class="ok" id="resetDone" hidden></div>
+  </section>
+
+  <section class="panel" id="adminLogin" hidden>
+    <label for="adminCode">Beheerderscode</label>
+    <div class="actions">
+      <input id="adminCode" type="password" inputmode="numeric" autocomplete="off">
+      <button type="button" class="btn" id="adminGo">Aanmelden</button>
+      <button type="button" class="link" id="adminCancel">Annuleren</button>
+    </div>
+  </section>
+
+  <p class="foot"><button type="button" class="link" id="adminOpen">Beheer</button></p>
+</div>
+
+<script>
+let PLACES = 16, people = [], busy = false, me = null;
+try { me = localStorage.getItem('plaatsen-me'); } catch (e) {}
+const $ = id => document.getElementById(id);
+
+function computeOrder(people) {
+  const active = people.filter(p => p.s !== 'nee');
+  const declined = people.filter(p => p.s === 'nee').sort((a, b) => a.t - b.t);
+  const rows = active.map((p, i) => {
+    let cls, state;
+    if (i < PLACES) { cls = p.s === 'ja' ? 'ok' : 'idle'; state = p.s === 'ja' ? 'Komt · heeft een plaats' : 'Nog geen antwoord · plaats voorzien'; }
+    else { cls = p.s === 'ja' ? 'wait' : 'idle'; state = p.s === 'ja' ? 'Komt graag · wachtlijst ' + (i - PLACES + 1) : 'Nog geen antwoord · reserve'; }
+    return { p, cls, state };
+  });
+  declined.forEach(p => rows.push({ p, cls: 'no', state: 'Komt niet' }));
+  return rows;
+}
+
+function render() {
+  const rows = computeOrder(people);
+  const activeCount = rows.filter(r => r.cls !== 'no').length;
+  const list = $('list');
+  list.textContent = '';
+  $('empty').hidden = people.length > 0;
+  if (!people.length) $('empty').textContent = 'De namenlijst is nog leeg.';
+  $('sub').textContent = PLACES + ' plaatsen per week. Duid aan of je komt; de lijst schuift vanzelf door.';
+  rows.forEach((r, idx) => {
+    if (idx === PLACES && activeCount > PLACES) {
+      const cut = document.createElement('li'); cut.className = 'cut'; cut.textContent = 'Wachtlijst'; list.appendChild(cut);
+    }
+    const id = r.p.name;
+    const li = document.createElement('li');
+    li.className = 'row ' + r.cls + (id === me ? ' me' : '');
+    li.innerHTML = '<span class="nr"></span><span class="who"><div class="name"></div><div class="state"></div></span>' +
+      '<span class="btns"><button type="button" class="yes" aria-label="Ik kom">✓</button><button type="button" class="nay" aria-label="Ik kom niet">✕</button></span>';
+    li.querySelector('.nr').textContent = idx + 1;
+    li.querySelector('.name').textContent = r.p.name;
+    li.querySelector('.state').textContent = r.state;
+    if (id !== me) li.querySelector('.btns').hidden = true;
+    const yes = li.querySelector('.yes'), nay = li.querySelector('.nay');
+    yes.classList.toggle('on', r.p.s === 'ja'); nay.classList.toggle('on', r.p.s === 'nee');
+    yes.setAttribute('aria-pressed', r.p.s === 'ja'); nay.setAttribute('aria-pressed', r.p.s === 'nee');
+    yes.disabled = nay.disabled = busy;
+    yes.onclick = () => setStatus(r.p, r.p.s === 'ja' ? '' : 'ja');
+    nay.onclick = () => setStatus(r.p, r.p.s === 'nee' ? '' : 'nee');
+    list.appendChild(li);
+  });
+  const n = k => rows.filter(r => r.cls === k).length;
+  $('tally').textContent = '';
+  [['ok', n('ok') + '/' + PLACES + ' bevestigd'], ['wait', n('wait') + ' wachtlijst'], ['no', n('no') + ' afgemeld'], ['idle', n('idle') + ' geen antwoord']]
+    .forEach(([c, t]) => { const el = document.createElement('span'); el.className = 'chip ' + c; el.innerHTML = '<i></i>'; el.append(t); $('tally').appendChild(el); });
+  const sel = $('meSelect');
+  $('mePanel').hidden = !people.length;
+  sel.textContent = '';
+  sel.add(new Option('— kies je naam —', ''));
+  people.forEach(p => sel.add(new Option(p.name, p.name)));
+  const known = people.some(p => p.name === me);
+  sel.value = known ? me : '';
+  $('chooseMe').hidden = known;
+  $('isMe').hidden = !known;
+  $('meName').textContent = known ? me : '';
+}
+
+$('changeMe').addEventListener('click', () => {
+  me = null;
+  try { localStorage.removeItem('plaatsen-me'); } catch (err) {}
+  render();
+  $('meSelect').focus();
+});
+
+function showError(e) { $('err').textContent = (e && e.message) ? e.message : 'Er ging iets mis. Probeer opnieuw.'; $('err').hidden = false; $('err').scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+let datum = '';
+function isoToDate(iso) { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ''); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; }
+function dateToIso(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function fmtDate(iso) { const d = isoToDate(iso); return d ? d.toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : ''; }
+
+function apply(state) {
+  PLACES = state.plaatsen; people = state.people;
+  datum = state.datum || '';
+  $('when').hidden = !datum;
+  $('whenDate').textContent = fmtDate(datum);
+  $('err').hidden = true;
+  $('foot').textContent = 'Bijgewerkt om ' + new Date().toLocaleTimeString('nl-BE', { hour: '2-digit', minute: '2-digit' });
+  render();
+}
+
+/* Verbinding met het Google Apps Script (adres staat in config.js) */
+async function api(body) {
+  const url = (window.API_URL || '').trim();
+  if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(url)) {
+    throw new Error('De app is nog niet gekoppeld: vul in config.js de link van het Google Apps Script in (eindigt op /exec).');
+  }
+  let res;
+  try {
+    res = await fetch(url, { method: 'POST', body: JSON.stringify(body) });
+  } catch (e) {
+    throw new Error('Geen verbinding. Controleer je internet en probeer opnieuw.');
+  }
+  let data;
+  try { data = await res.json(); } catch (e) { throw new Error('Het script gaf een onverwacht antwoord. Staat de toegang op "Iedereen"?'); }
+  if (!data.ok) throw new Error(data.error || 'Er ging iets mis.');
+  return data.state;
+}
+
+let loading = false;
+async function load() {
+  if (busy || loading) return;
+  loading = true;
+  try { const st = await api({ action: 'state' }); if (!busy) apply(st); }
+  catch (e) { showError(e); }
+  finally { loading = false; }
+}
+
+async function setStatus(p, s) {
+  const prev = { s: p.s, t: p.t };
+  p.s = s; p.t = Date.now(); busy = true; render();
+  try {
+    const st = await api({ action: 'setStatus', row: p.row, name: p.name, s: s });
+    busy = false; apply(st);
+  } catch (e) {
+    busy = false; p.s = prev.s; p.t = prev.t; render(); showError(e);
+  }
+}
+
+$('meSelect').addEventListener('change', e => {
+  me = e.target.value || null;
+  try { me ? localStorage.setItem('plaatsen-me', me) : localStorage.removeItem('plaatsen-me'); } catch (err) {}
+  render();
+  const row = document.querySelector('.row.me');
+  if (row) row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+});
+
+/* Beheer: de code wordt na één keer aanmelden op dit toestel onthouden */
+let adminCode = null;
+try { adminCode = localStorage.getItem('plaatsen-beheer'); } catch (e) {}
+function showAdmin() {
+  $('admin').hidden = !adminCode;
+  $('adminLogin').hidden = true;
+  $('adminOpen').hidden = !!adminCode;
+  $('resetActions').hidden = false; $('resetConfirm').hidden = true;
+}
+$('adminOpen').onclick = () => { $('adminLogin').hidden = false; $('adminOpen').hidden = true; $('adminCode').focus(); };
+$('adminCancel').onclick = showAdmin;
+$('adminGo').onclick = () => {
+  const code = $('adminCode').value;
+  $('adminGo').disabled = true;
+  api({ action: 'checkAdmin', code: code })
+    .then(() => {
+      adminCode = code; $('adminCode').value = ''; $('adminGo').disabled = false;
+      try { localStorage.setItem('plaatsen-beheer', code); } catch (e) {}
+      showAdmin();
+    })
+    .catch(e => { $('adminGo').disabled = false; showError(e); });
+};
+$('adminLogout').onclick = () => {
+  adminCode = null;
+  try { localStorage.removeItem('plaatsen-beheer'); } catch (e) {}
+  showAdmin();
+};
+let adminMode = 'reset';
+function openConfirm(mode) {
+  adminMode = mode;
+  let d = isoToDate(datum);
+  if (mode === 'reset') {
+    // Voorstel: een week na de huidige datum, of over een week als er nog geen datum is
+    if (d) d.setDate(d.getDate() + 7); else { d = new Date(); d.setDate(d.getDate() + 7); }
+    $('confirmText').textContent = 'Alle antwoorden worden gewist en iedereen staat terug in de vaste volgorde.';
+    $('resetYes').textContent = 'Ja, nieuwe week starten';
+  } else {
+    if (!d) { d = new Date(); }
+    $('confirmText').textContent = 'De antwoorden blijven staan.';
+    $('resetYes').textContent = 'Datum opslaan';
+  }
+  $('newDate').value = dateToIso(d);
+  $('resetActions').hidden = true; $('resetConfirm').hidden = false; $('resetDone').hidden = true;
+  $('newDate').focus();
+}
+$('resetBtn').onclick = () => openConfirm('reset');
+$('dateBtn').onclick = () => openConfirm('date');
+$('resetNo').onclick = showAdmin;
+$('resetYes').onclick = () => {
+  const nd = $('newDate').value;
+  if (!isoToDate(nd)) { showError({ message: 'Kies eerst een datum.' }); return; }
+  $('resetYes').disabled = true;
+  const done = adminMode === 'reset'
+    ? 'Nieuwe week gestart voor ' + fmtDate(nd) + '.'
+    : 'Datum aangepast naar ' + fmtDate(nd) + '.';
+  api({ action: adminMode === 'reset' ? 'nieuweWeek' : 'wijzigDatum', code: adminCode, datum: nd })
+    .then(state => { $('resetYes').disabled = false; apply(state); showAdmin(); $('resetDone').textContent = done; $('resetDone').hidden = false; })
+    .catch(e => { $('resetYes').disabled = false; showAdmin(); showError(e); });
+};
+showAdmin();
+
+load();
+setInterval(load, 20000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); });
+
+/* Nodig om de pagina als app te kunnen installeren */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
+</script>
+</body>
+</html>
