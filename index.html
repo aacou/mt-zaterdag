@@ -17,14 +17,14 @@
 <style>
 :root {
   --bg: #f3f5f8; --surface: #ffffff; --fg: #172033; --muted: #5d6779; --line: #dde2ea; --accent: #2446a8;
-  --ok: #1d8a4e; --ok-bg: #e3f4ea; --wait: #c46a08; --wait-bg: #fdf0dc; --no: #c2352b; --no-bg: #fbe5e3; --idle-bg: #eef1f5;
+  --ok: #1d8a4e; --ok-bg: #e3f4ea; --wait: #c46a08; --wait-bg: #fdf0dc; --no: #c2352b; --no-bg: #fbe5e3; --idle-bg: #eef1f5; --part: #6a3fb5; --part-bg: #efe8fb; --okpart: #3f9e66; --okpart-bg: #f2fbf5;
   --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
   --body: "Figtree", "Segoe UI", system-ui, sans-serif;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) { :root {
   --bg: #0f141d; --surface: #182030; --fg: #e8ecf3; --muted: #9aa4b6; --line: #2a3446; --accent: #8fa9ff;
-  --ok: #4fd18a; --ok-bg: #143323; --wait: #f4a547; --wait-bg: #3a2810; --no: #ff7a6e; --no-bg: #3d1a17; --idle-bg: #212a3b;
+  --ok: #4fd18a; --ok-bg: #143323; --wait: #f4a547; --wait-bg: #3a2810; --no: #ff7a6e; --no-bg: #3d1a17; --idle-bg: #212a3b; --part: #c3a6ff; --part-bg: #2c2245; --okpart: #8fe0b2; --okpart-bg: #18291f;
   color-scheme: dark } }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -44,20 +44,26 @@ h1 { font: 800 1.9rem/1.05 var(--display); margin: 0; letter-spacing: -0.01em; }
 .chip.idle { background: var(--idle-bg); color: var(--muted); } .chip.idle i { background: var(--muted); }
 .legend { font-size: .85rem; color: var(--muted); margin: 0; }
 ol.list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.row { display: grid; grid-template-columns: 2.2rem 1fr auto; align-items: center; gap: 10px;
+.row { display: grid; grid-template-columns: 1.8rem 1fr auto; align-items: center; gap: 8px;
   background: var(--surface); border: 1px solid var(--line); border-left: 6px solid var(--line);
   border-radius: 10px; padding: 8px 8px 8px 10px; }
 .nr { font: 800 1.15rem/1 var(--display); color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
 .who { min-width: 0; }
-.name { font-weight: 600; overflow-wrap: anywhere; }
+.name { font-weight: 600; overflow-wrap: break-word; hyphens: auto; }
 .state { font-size: .8rem; color: var(--muted); }
 .row.ok { background: var(--ok-bg); border-left-color: var(--ok); } .row.ok .state, .row.ok .nr { color: var(--ok); }
 .row.wait { background: var(--wait-bg); border-left-color: var(--wait); } .row.wait .state, .row.wait .nr { color: var(--wait); }
 .row.no { background: var(--no-bg); border-left-color: var(--no); } .row.no .state, .row.no .nr { color: var(--no); }
 .row.no .name { text-decoration: line-through; }
+.row.part, .row.partno { background: var(--part-bg); border-left-color: var(--part); } .row.part .state, .row.part .nr, .row.partno .state, .row.partno .nr { color: var(--part); }
+.row.partok { background: var(--okpart-bg); border-left-color: var(--okpart); } .row.partok .state, .row.partok .nr { color: var(--okpart); }
+.row.partno { opacity: .75; }
+.chip.part { background: var(--part-bg); color: var(--part); } .chip.part i { background: var(--part); }
+.btns button.mid { font-size: .82rem; letter-spacing: -.02em; }
+.btns button.mid.on { background: var(--part); border-color: var(--part); color: var(--surface); }
 .row.me { outline: 2px solid var(--accent); outline-offset: 1px; }
-.btns { display: flex; gap: 6px; }
-.btns button { width: 44px; height: 40px; border-radius: 9px; border: 1.5px solid var(--line); background: var(--surface);
+.btns { display: flex; gap: 5px; }
+.btns button { width: 42px; height: 40px; border-radius: 9px; border: 1.5px solid var(--line); background: var(--surface);
   color: var(--muted); font: 600 1.15rem/1 var(--body); cursor: pointer; }
 .btns button.yes.on { background: var(--ok); border-color: var(--ok); color: var(--surface); }
 .btns button.nay.on { background: var(--no); border-color: var(--no); color: var(--surface); }
@@ -102,7 +108,7 @@ select { font: inherit; color: var(--fg); background: var(--bg); border: 1px sol
   </header>
   <div class="closed" id="closedBanner" hidden><b>Inschrijvingen afgesloten.</b> Antwoorden kunnen niet meer gewijzigd worden tot de volgende ronde.</div>
   <div class="tally" id="tally" aria-live="polite"></div>
-  <p class="legend"><b>Groen</b>: je hebt een plaats. <b>Oranje</b>: je komt graag, maar staat op de wachtlijst. <b>Rood</b>: je komt niet. Grijs: nog niet geantwoord.</p>
+  <p class="legend"><b>Groen</b>: je hebt een plaats. <b>Oranje</b>: je komt graag, maar staat op de wachtlijst. <b>Rood</b>: je komt niet.<span id="legendPart"> <b>Paars (2/3)</b>: je komt, maar vertrekt vroeger; dat wordt pas bij het afsluiten toegekend of niet.</span> Grijs: nog niet geantwoord.</p>
   <div class="panel" id="mePanel" hidden>
     <div id="chooseMe">
       <label for="meSelect">Wie ben jij? Kies je naam om te kunnen antwoorden.</label>
@@ -124,6 +130,8 @@ select { font: inherit; color: var(--fg); background: var(--bg); border: 1px sol
       <button type="button" class="btn danger" id="resetBtn">Nieuwe week starten</button>
       <button type="button" class="btn ghost" id="dateBtn">Enkel datum aanpassen</button>
       <button type="button" class="btn ghost" id="lockBtn">Inschrijvingen afsluiten</button>
+      <button type="button" class="btn wa" id="remindBtn">Reminder sturen</button>
+      <button type="button" class="btn wa" id="listBtn">Lijst versturen</button>
       <button type="button" class="link" id="adminLogout">Afmelden als beheerder</button>
     </div>
     <div id="resetConfirm" class="confirm" hidden>
@@ -155,6 +163,8 @@ select { font: inherit; color: var(--fg); background: var(--bg); border: 1px sol
 </div>
 
 <script>
+// Zet op false om de keuze 2/3 (vroeger vertrekken) uit te schakelen.
+const TWEE_DERDE = true;
 let PLACES = 16, people = [], busy = false, me = null;
 // Opslag per app (map op GitHub), zodat meerdere groepen op hetzelfde account elkaar niet storen
 const KEY_ME = 'plaatsen-me:' + location.pathname;
@@ -162,51 +172,82 @@ const KEY_ADMIN = 'plaatsen-beheer:' + location.pathname;
 try { me = localStorage.getItem(KEY_ME) || localStorage.getItem('plaatsen-me'); } catch (e) {}
 const $ = id => document.getElementById(id);
 
+// Hoeveel spelers met 2/3 krijgen een plaats? Zo veel mogelijk, zonder boven het aantal
+// plaatsen te gaan, en zo dat het totaal aantal spelers even is.
+function deelsToegekend(bevestigd, aantalDeels) {
+  let k = Math.min(aantalDeels, Math.max(0, PLACES - bevestigd));
+  while (k > 0 && (bevestigd + k) % 2 !== 0) k--;
+  return k;
+}
+
 function computeOrder(people) {
-  const active = people.filter(p => p.s !== 'nee');
   const declined = people.filter(p => p.s === 'nee').sort((a, b) => a.t - b.t);
-  const rows = active.map((p, i) => {
-    let cls, state;
-    if (i < PLACES) { cls = p.s === 'ja' ? 'ok' : 'idle'; state = p.s === 'ja' ? 'Komt · heeft een plaats' : 'Nog geen antwoord · plaats voorzien'; }
-    else { cls = p.s === 'ja' ? 'wait' : 'idle'; state = p.s === 'ja' ? 'Komt graag · wachtlijst ' + (i - PLACES + 1) : 'Nog geen antwoord · reserve'; }
-    return { p, cls, state };
-  });
+  const deels = people.filter(p => p.s === 'deels');   // in volgorde van de oorspronkelijke lijst
+  const rows = [];
+  if (!gesloten) {
+    const active = people.filter(p => p.s !== 'nee' && p.s !== 'deels');
+    active.forEach((p, i) => {
+      let cls, state;
+      if (i < PLACES) { cls = p.s === 'ja' ? 'ok' : 'idle'; state = p.s === 'ja' ? 'Komt · heeft een plaats' : 'Nog geen antwoord · plaats voorzien'; }
+      else { cls = p.s === 'ja' ? 'wait' : 'idle'; state = p.s === 'ja' ? 'Komt graag · wachtlijst ' + (i - PLACES + 1) : 'Nog geen antwoord · reserve'; }
+      rows.push({ p, cls, state, cut: i === PLACES });
+    });
+    deels.forEach(p => rows.push({ p, cls: 'part', state: '2/3 · wordt bekeken bij het afsluiten' }));
+  } else {
+    // Afgesloten: wie niet antwoordde, telt niet mee. Eerst de bevestigde spelers, dan de toegekende 2/3.
+    const ja = people.filter(p => p.s === 'ja');
+    const bevestigd = Math.min(ja.length, PLACES);
+    const k = deelsToegekend(bevestigd, deels.length);
+    ja.slice(0, PLACES).forEach(p => rows.push({ p, cls: 'ok', state: 'Komt · heeft een plaats' }));
+    deels.slice(0, k).forEach(p => rows.push({ p, cls: 'partok', state: '2/3 · toegekend, vertrekt vroeger' }));
+    const cutAt = rows.length;
+    ja.slice(PLACES).forEach((p, i) => rows.push({ p, cls: 'wait', state: 'Wachtlijst ' + (i + 1) }));
+    deels.slice(k).forEach(p => rows.push({ p, cls: 'partno', state: '2/3 · niet toegekend' }));
+    people.filter(p => !p.s).forEach(p => rows.push({ p, cls: 'idle', state: 'Geen antwoord' }));
+    if (rows.length > cutAt && cutAt > 0) rows[cutAt].cut = true;
+  }
   declined.forEach(p => rows.push({ p, cls: 'no', state: 'Komt niet' }));
   return rows;
 }
 
 function render() {
+  $('legendPart').hidden = !TWEE_DERDE;
   const rows = computeOrder(people);
-  const activeCount = rows.filter(r => r.cls !== 'no').length;
   const list = $('list');
   list.textContent = '';
   $('empty').hidden = people.length > 0;
   if (!people.length) $('empty').textContent = 'De namenlijst is nog leeg.';
   $('sub').textContent = PLACES + ' plaatsen per week. Duid aan of je komt; de lijst schuift vanzelf door.';
   rows.forEach((r, idx) => {
-    if (idx === PLACES && activeCount > PLACES) {
-      const cut = document.createElement('li'); cut.className = 'cut'; cut.textContent = 'Wachtlijst'; list.appendChild(cut);
+    if (r.cut) {
+      const cut = document.createElement('li'); cut.className = 'cut'; cut.textContent = gesloten ? 'Geen plaats' : 'Wachtlijst'; list.appendChild(cut);
     }
     const id = r.p.name;
     const li = document.createElement('li');
     li.className = 'row ' + r.cls + (id === me ? ' me' : '');
     li.innerHTML = '<span class="nr"></span><span class="who"><div class="name"></div><div class="state"></div></span>' +
-      '<span class="btns"><button type="button" class="yes" aria-label="Ik kom">✓</button><button type="button" class="nay" aria-label="Ik kom niet">✕</button></span>';
+      '<span class="btns"><button type="button" class="yes" aria-label="Ik kom">✓</button><button type="button" class="mid" aria-label="Ik kom, maar vertrek vroeger (2/3)">2/3</button><button type="button" class="nay" aria-label="Ik kom niet">✕</button></span>';
     li.querySelector('.nr').textContent = idx + 1;
     li.querySelector('.name').textContent = r.p.name;
     li.querySelector('.state').textContent = r.state;
+    if (!TWEE_DERDE) li.querySelector('.mid').remove();
     if (id !== me || gesloten) li.querySelector('.btns').hidden = true;
-    const yes = li.querySelector('.yes'), nay = li.querySelector('.nay');
-    yes.classList.toggle('on', r.p.s === 'ja'); nay.classList.toggle('on', r.p.s === 'nee');
-    yes.setAttribute('aria-pressed', r.p.s === 'ja'); nay.setAttribute('aria-pressed', r.p.s === 'nee');
-    yes.disabled = nay.disabled = busy;
-    yes.onclick = () => setStatus(r.p, r.p.s === 'ja' ? '' : 'ja');
-    nay.onclick = () => setStatus(r.p, r.p.s === 'nee' ? '' : 'nee');
+    [['.yes', 'ja'], ['.mid', 'deels'], ['.nay', 'nee']].forEach(([sel, val]) => {
+      const b = li.querySelector(sel);
+      if (!b) return;
+      b.classList.toggle('on', r.p.s === val);
+      b.setAttribute('aria-pressed', r.p.s === val);
+      b.disabled = busy;
+      b.onclick = () => setStatus(r.p, r.p.s === val ? '' : val);
+    });
     list.appendChild(li);
   });
   const n = k => rows.filter(r => r.cls === k).length;
   $('tally').textContent = '';
-  [['ok', n('ok') + '/' + PLACES + ' bevestigd'], ['wait', n('wait') + ' wachtlijst'], ['no', n('no') + ' afgemeld'], ['idle', n('idle') + ' geen antwoord']]
+  const chips = gesloten
+    ? [['ok', (n('ok') + n('partok')) + '/' + PLACES + ' spelen' + (n('partok') ? ' (waarvan ' + n('partok') + ' × 2/3)' : '')], ['wait', n('wait') + ' wachtlijst'], ['part', n('partno') + ' × 2/3 niet toegekend'], ['no', n('no') + ' afgemeld'], ['idle', n('idle') + ' geen antwoord']]
+    : [['ok', n('ok') + '/' + PLACES + ' bevestigd'], ['wait', n('wait') + ' wachtlijst'], ['part', n('part') + ' × 2/3'], ['no', n('no') + ' afgemeld'], ['idle', n('idle') + ' geen antwoord']];
+  chips.filter(c => c[0] === 'ok' || !/^0 /.test(c[1]))
     .forEach(([c, t]) => { const el = document.createElement('span'); el.className = 'chip ' + c; el.innerHTML = '<i></i>'; el.append(t); $('tally').appendChild(el); });
   const sel = $('meSelect');
   $('mePanel').hidden = !people.length;
@@ -218,7 +259,7 @@ function render() {
   $('chooseMe').hidden = known;
   $('isMe').hidden = !known;
   $('meName').textContent = known ? me : '';
-  $('isMe').querySelector('span').lastChild.textContent = gesloten ? '. De inschrijvingen zijn afgesloten.' : '. Antwoord met ✓ of ✕ op je eigen rij.';
+  $('isMe').querySelector('span').lastChild.textContent = gesloten ? '. De inschrijvingen zijn afgesloten.' : (TWEE_DERDE ? '. Antwoord met ✓, 2/3 of ✕ op je eigen rij.' : '. Antwoord met ✓ of ✕ op je eigen rij.');
 }
 
 $('changeMe').addEventListener('click', () => {
@@ -244,6 +285,7 @@ function apply(state) {
   $('when').hidden = !datum;
   $('whenDate').textContent = fmtDate(datum);
   $('err').hidden = true;
+  if (typeof adminCode !== 'undefined' && adminCode) maakLijstAfbeelding();
   $('foot').textContent = 'Bijgewerkt om ' + new Date().toLocaleTimeString('nl-BE', { hour: '2-digit', minute: '2-digit' });
   render();
 }
@@ -297,7 +339,16 @@ $('meSelect').addEventListener('change', e => {
 /* Beheer: de code wordt na één keer aanmelden op dit toestel onthouden */
 let adminCode = null;
 try { adminCode = localStorage.getItem(KEY_ADMIN); } catch (e) {}
+let reminderFile = null;
+function laadReminder() {
+  if (reminderFile) return;
+  fetch('reminder.jpg', { cache: 'no-cache' })
+    .then(r => r.ok ? r.blob() : Promise.reject())
+    .then(b => { reminderFile = new File([b], 'reminder.jpg', { type: 'image/jpeg' }); })
+    .catch(() => {});
+}
 function showAdmin() {
+  if (adminCode) { laadReminder(); maakLijstAfbeelding(); }
   $('admin').hidden = !adminCode;
   $('adminLogin').hidden = true;
   $('adminOpen').hidden = !!adminCode;
@@ -339,6 +390,12 @@ function openConfirm(mode) {
   $('resetActions').hidden = true; $('resetConfirm').hidden = false; $('resetDone').hidden = true;
   $('newDate').focus();
 }
+function deelsSamenvatting() {
+  const totaal = people.filter(p => p.s === 'deels').length;
+  if (!totaal) return '';
+  const k = computeOrder(people).filter(r => r.cls === 'partok').length;
+  return ' ' + k + ' van de ' + totaal + ' spelers met 2/3 ' + (k === 1 ? 'krijgt' : 'krijgen') + ' een plaats.';
+}
 $('lockBtn').onclick = () => {
   const dicht = !gesloten;
   $('lockBtn').disabled = true; $('resetDone').hidden = true;
@@ -346,11 +403,107 @@ $('lockBtn').onclick = () => {
     .then(state => {
       $('lockBtn').disabled = false; apply(state);
       $('resetDoneText').textContent = dicht
-        ? 'De inschrijvingen zijn afgesloten. Niemand kan nog iets wijzigen tot je een nieuwe week start of heropent.'
+        ? 'De inschrijvingen zijn afgesloten. Niemand kan nog iets wijzigen tot je een nieuwe week start of heropent.' + deelsSamenvatting()
         : 'De inschrijvingen zijn weer open.';
       $('waBtn').hidden = true; $('resetDone').hidden = false;
     })
     .catch(e => { $('lockBtn').disabled = false; showError(e); });
+};
+/* ---------- Lijst als afbeelding ---------- */
+let lijstFile = null;
+const lijstLogo = new Image();
+lijstLogo.src = 'icon-192.png';
+
+function maakLijstAfbeelding() {
+  const spelers = computeOrder(people).filter(r => r.cls === 'ok' || r.cls === 'partok');
+  const F = '"Figtree", "Segoe UI", Roboto, Arial, sans-serif';
+  const W = 1080, PAD = 60, HEAD = 230, ROW = 84, GAP = 10, FOOT = 110;
+  const H = HEAD + Math.max(1, spelers.length) * (ROW + GAP) + FOOT;
+  const c = document.createElement('canvas');
+  c.width = W; c.height = H;
+  const x = c.getContext('2d');
+  const rond = (rx, ry, rw, rh, r) => { x.beginPath(); x.moveTo(rx + r, ry); x.arcTo(rx + rw, ry, rx + rw, ry + rh, r); x.arcTo(rx + rw, ry + rh, rx, ry + rh, r); x.arcTo(rx, ry + rh, rx, ry, r); x.arcTo(rx, ry, rx + rw, ry, r); x.closePath(); };
+  const kort = (t, max) => { if (x.measureText(t).width <= max) return t; while (t.length > 1 && x.measureText(t + '…').width > max) t = t.slice(0, -1); return t + '…'; };
+
+  // Achtergrond en kop
+  x.fillStyle = '#f3f5f8'; x.fillRect(0, 0, W, H);
+  x.fillStyle = '#184a3a'; x.fillRect(0, 0, W, HEAD - 30);
+  let tx = PAD;
+  if (lijstLogo.complete && lijstLogo.naturalWidth) { x.drawImage(lijstLogo, PAD, 40, 120, 120); tx = PAD + 150; }
+  x.fillStyle = '#ffffff'; x.font = '800 64px ' + F; x.textBaseline = 'alphabetic';
+  x.fillText(kort(document.title, W - tx - PAD), tx, 102);
+  x.fillStyle = '#d6e834'; x.font = '600 38px ' + F;
+  x.fillText(kort(datum ? fmtDate(datum) : 'Spelerslijst', W - tx - PAD), tx, 152);
+
+  // Rijen
+  let y = HEAD;
+  if (!spelers.length) {
+    x.fillStyle = '#5d6779'; x.font = '500 36px ' + F;
+    x.fillText('Nog niemand heeft een plaats.', PAD, y + 52);
+    y += ROW + GAP;
+  }
+  spelers.forEach((r, i) => {
+    const deel = r.cls === 'partok';
+    rond(PAD, y, W - 2 * PAD, ROW, 14);
+    x.fillStyle = deel ? '#f2fbf5' : '#e3f4ea'; x.fill();
+    x.fillStyle = deel ? '#3f9e66' : '#1d8a4e'; x.fillRect(PAD, y, 10, ROW);
+    x.font = '800 36px ' + F; x.textAlign = 'right';
+    x.fillText(String(i + 1), PAD + 80, y + 55);
+    x.textAlign = 'left';
+    let labelW = 0;
+    if (deel) {
+      x.font = '600 26px ' + F; const lab = '2/3 · vertrekt vroeger';
+      labelW = x.measureText(lab).width + 30;
+      x.fillText(lab, W - PAD - labelW + 10, y + 53);
+    }
+    x.fillStyle = '#172033'; x.font = '600 38px ' + F;
+    x.fillText(kort(r.p.name, W - 2 * PAD - 120 - labelW), PAD + 110, y + 55);
+    y += ROW + GAP;
+  });
+
+  // Voet
+  const deels = spelers.filter(r => r.cls === 'partok').length;
+  x.fillStyle = '#5d6779'; x.font = '500 30px ' + F;
+  x.fillText(spelers.length + (spelers.length === 1 ? ' speler' : ' spelers') + (deels ? ' (waarvan ' + deels + ' × 2/3)' : '') +
+    (gesloten ? ' · inschrijvingen afgesloten' : ' · stand van ' + new Date().toLocaleTimeString('nl-BE', { hour: '2-digit', minute: '2-digit' })),
+    PAD, y + 50);
+
+  c.toBlob(b => { if (b) lijstFile = new File([b], 'spelerslijst.png', { type: 'image/png' }); }, 'image/png');
+}
+
+$('listBtn').onclick = async () => {
+  $('resetDone').hidden = true;
+  if (lijstFile && navigator.canShare && navigator.canShare({ files: [lijstFile] })) {
+    try {
+      await navigator.share({ files: [lijstFile] });
+      return;
+    } catch (e) {
+      if (e && e.name === 'AbortError') return;
+    }
+  }
+  $('resetDoneText').textContent = lijstFile
+    ? 'Dit toestel kan geen afbeelding delen. Gebruik de knop op je smartphone.'
+    : 'De lijst wordt nog klaargemaakt. Probeer het over een paar seconden opnieuw.';
+  if (!lijstFile) maakLijstAfbeelding();
+  $('waBtn').hidden = true; $('resetDone').hidden = false;
+};
+
+$('remindBtn').onclick = async () => {
+  $('resetDone').hidden = true;
+  // Enkel de afbeelding via het deelmenu van de telefoon (kies daar WhatsApp en de groep)
+  if (reminderFile && navigator.canShare && navigator.canShare({ files: [reminderFile] })) {
+    try {
+      await navigator.share({ files: [reminderFile] });
+      return;
+    } catch (e) {
+      if (e && e.name === 'AbortError') return; // zelf geannuleerd
+    }
+  }
+  $('resetDoneText').textContent = reminderFile
+    ? 'Dit toestel kan geen afbeelding delen. Gebruik de knop op je smartphone.'
+    : 'De afbeelding is nog niet geladen. Controleer je internetverbinding en probeer opnieuw.';
+  if (!reminderFile) laadReminder();
+  $('waBtn').hidden = true; $('resetDone').hidden = false;
 };
 $('resetBtn').onclick = () => openConfirm('reset');
 $('dateBtn').onclick = () => openConfirm('date');
